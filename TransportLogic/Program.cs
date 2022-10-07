@@ -410,6 +410,8 @@ void PotentialMethod()
             DistributeSigns(ref ints);
             Permutation(ref ints);
             SupplieMatrixOutput();
+            loopBuilded = false;
+            peaks.Clear();
         }
     }
 }
