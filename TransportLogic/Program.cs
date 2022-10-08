@@ -63,8 +63,8 @@ List<PBCellLoc> bases = new List<PBCellLoc>();
 List<PBCellLoc> resBases = new List<PBCellLoc>();
 List<Peak> peaks = new List<Peak>();
 
-bool notPeaksInColumn = true;
-bool notPeaksInRow = true;
+bool notPeaksInColumn = false;
+bool notPeaksInRow = false;
 bool loopBuilded = false;
 bool wrongWay;
 
@@ -286,14 +286,11 @@ void SolvingLoopBuilder(int iterator, int order, int bi, int bj)
                         notPeaksInColumn = true;
                     }
                 }
-                if (notPeaksInColumn == true && notPeaksInRow == true)
+                if (notPeaksInColumn == true || notPeaksInRow == true)
                 {
                     loopBuilded = false;
                     wrongWay = true;
-                    for (int i = 0; i < peaks.Count; i++)
-                    {
-                        helpMatrix[peaks[i].i][peaks[i].j].Value = 0;
-                    }
+                    HelpMatrixClearing();
                     SolvingLoopBuilder(iterator, 0, peaks[0].i, peaks[0].j);
                 }
                 else
@@ -323,14 +320,11 @@ void SolvingLoopBuilder(int iterator, int order, int bi, int bj)
                         notPeaksInRow = true;
                     }
                 }
-                if (notPeaksInColumn == true && notPeaksInRow == true)
+                if (notPeaksInColumn == true || notPeaksInRow == true)
                 {
                     loopBuilded = false;
                     wrongWay = true;
-                    for (int i = 0; i < peaks.Count; i++)
-                    {
-                        helpMatrix[peaks[i].i][peaks[i].j].Value = 0;
-                    }
+                    HelpMatrixClearing();
                     SolvingLoopBuilder(iterator, 0, peaks[0].i, peaks[0].j);
                 }
                 else
@@ -381,6 +375,15 @@ void Permutation(ref int[] ints)
         }
     }
 }
+
+void HelpMatrixClearing()
+{
+    for (int i = 0; i < peaks.Count; i++)
+    {
+        helpMatrix[peaks[i].i][peaks[i].j].Value = 0;
+        helpMatrix[peaks[i].i][peaks[i].j].PeakOnWay = false;
+    }
+}
 #endregion
 
 //------------Решение методом потенциалов------------//
@@ -399,6 +402,7 @@ void PotentialMethod()
     EnterX2();
     for (int i = 0; i < resBases.Count; i++)
     {
+        helpMatrix[resBases[i].i][resBases[i].j].PeakOnWay = true;
         HelpMatrixOutput();
         EnterX2();
         wrongWay = false;
@@ -411,7 +415,9 @@ void PotentialMethod()
             Permutation(ref ints);
             SupplieMatrixOutput();
             loopBuilded = false;
+            HelpMatrixClearing();
             peaks.Clear();
+
         }
     }
 }
