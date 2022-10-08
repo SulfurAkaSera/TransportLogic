@@ -414,6 +414,8 @@ void PotentialMethod()
             DistributeSigns(ref ints);
             Permutation(ref ints);
             SupplieMatrixOutput();
+            SetLocationOfPotentials();
+            EnterX2();
             loopBuilded = false;
             HelpMatrixClearing();
             peaks.Clear();
