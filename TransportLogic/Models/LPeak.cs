@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace TransportLogic.Models
 {
-    public class Peak
+    public class LPeak
     {
         public int i { get; set; }
         public int j { get; set; }
+        public char Sign { get; set; }
+        public bool Flag { get; set; }
     }
 }

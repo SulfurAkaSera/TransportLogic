@@ -10,5 +10,6 @@ namespace TransportLogic.Models
     {
         public int Value { get; set; }
         public bool PeakOnWay { get; set; }
+        public bool WrongPeak { get; set; }
     }
 }

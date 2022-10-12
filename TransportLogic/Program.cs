@@ -26,42 +26,19 @@ List<List<Cell>> matrix = new List<List<Cell>>
         new Cell {Cost = 7, Supplie = 0}
     }
 };
-List<List<TempPeak>> helpMatrix = new List<List<TempPeak>>
-{
-    new List<TempPeak>
-    {
-        new TempPeak {Value = 0, PeakOnWay = false},
-        new TempPeak {Value = 0, PeakOnWay = false},
-        new TempPeak {Value = 0, PeakOnWay = false},
-        new TempPeak {Value = 0, PeakOnWay = false}
-    },
-    new List<TempPeak>
-    {
-        new TempPeak {Value = 0, PeakOnWay = false},
-        new TempPeak {Value = 0, PeakOnWay = false},
-        new TempPeak {Value = 0, PeakOnWay = false},
-        new TempPeak {Value = 0, PeakOnWay = false}
-    },
-    new List<TempPeak>
-    {
-        new TempPeak {Value = 0, PeakOnWay = false},
-        new TempPeak {Value = 0, PeakOnWay = false},
-        new TempPeak {Value = 0, PeakOnWay = false},
-        new TempPeak {Value = 0, PeakOnWay = false}
-    }
-};
-
-List<int> providers = new List<int> { 30, 20, 50 };
-List<int> consumers = new List<int> { 25, 25, 40, 10 };
+List<int> providers = new() { 30, 20, 50 };
+List<int> consumers = new() { 25, 25, 40, 10 };
 
 
 //------------Вспомогательные массивы------------//
-List<ABValue> alphas = new List<ABValue>();
-List<ABValue> betas= new List<ABValue>();
-List<PBCellLoc> potentials = new List<PBCellLoc>();
-List<PBCellLoc> bases = new List<PBCellLoc>();
-List<PBCellLoc> resBases = new List<PBCellLoc>();
-List<Peak> peaks = new List<Peak>();
+List<List<TempPeak>> helpMatrix = new List<List<TempPeak>>();
+List<ABValue> alphas = new();
+List<ABValue> betas= new();
+List<PBCellLoc> potentials = new();
+List<PBCellLoc> bases = new();
+List<PBCellLoc> resBases = new();
+List<LPeak> lPeaks = new();
+List<List<Peak>> way = new();
 
 bool notPeaksInColumn = false;
 bool notPeaksInRow = false;
@@ -98,6 +75,19 @@ void CheckBalance(ref bool balance, ref int provSum, ref int consSum)
     }
     if (provSum == consSum)
         balance = true;
+}
+
+void HelpMatrixDefault()
+{
+    helpMatrix.Clear();
+    for (int i = 0; i < matrix.Count; i++)
+    {
+        helpMatrix.Add(new List<TempPeak>());
+        for(int j = 0; j < matrix[i].Count; j++)
+        {
+            helpMatrix[i].Add(new TempPeak { Value = 0, PeakOnWay = false, WrongPeak = false});
+        }
+    }
 }
 #endregion
 
@@ -255,133 +245,105 @@ void AddResolvingBases()
     }
 }
 
-void SolvingLoopBuilder(int iterator, int order, int bi, int bj)
+void SolvingLoopBuilder(int bi, int bj)
 {
-    if (wrongWay == false && loopBuilded == false)
+    int pi = bi;
+    int pj = bj;
+    var column = new List<Peak>();
+    var row = new List<Peak>();
+    int iterator = 0;
+    int order = 0;
+    Way();
+    void Way()
     {
-        if (iterator < (matrix.Count + matrix[0].Count) - 1)
+        if (order == 0)
         {
-            iterator++;
-            if (order == 0)
+            order = 1;
+            way.Add(new List<Peak>());
+            for (int i = 0; i < helpMatrix.Count; i++)
             {
-                int ii = bi;
-                for (int i = 0; i < matrix.Count; i++)
+                if (matrix[i][pj].Supplie > 0 && helpMatrix[i][pj].PeakOnWay != true)
                 {
-                    if (matrix[i][bj].Supplie > 0 && i != bi && helpMatrix[i][bj].PeakOnWay == false)
-                    {
-                        ii = i;
-                        helpMatrix[i][bj].Value = 1;
-                        helpMatrix[i][bj].PeakOnWay = true;
-                        peaks.Add(new Peak { i = i, j = bj });
-                        notPeaksInColumn = false;
-                        break;
-                    }
-                    if(iterator >= 3 && peaks[0].i == i && peaks[0].j == bj )
-                    {
-                        loopBuilded = true;
-                        break;
-                    }
-                    else
-                    {
-                        notPeaksInColumn = true;
-                    }
+                    column.Add(new Peak { i = i, j = pj});
                 }
-                if (notPeaksInColumn == true || notPeaksInRow == true)
-                {
-                    loopBuilded = false;
-                    wrongWay = true;
-                    HelpMatrixClearing();
-                    SolvingLoopBuilder(iterator, 0, peaks[0].i, peaks[0].j);
-                }
-                else
-                    SolvingLoopBuilder(iterator, 1, ii, bj);
             }
-            else if (order == 1)
+            way[iterator].AddRange(column);
+            for (int k = 0; k < way[iterator].Count; k++)
             {
-                int jj = bj;
-                for (int j = 0; j < matrix[0].Count; j++)
+                if (helpMatrix[way[iterator][k].i][way[iterator][k].j].WrongPeak != true)
                 {
-                    if (matrix[bi][j].Supplie > 0 && j != bj && helpMatrix[bi][j].PeakOnWay == false)
-                    {
-                        jj = j;
-                        helpMatrix[bi][j].Value = 1;
-                        helpMatrix[bi][j].PeakOnWay = true;
-                        peaks.Add(new Peak {i = bi, j = j });
-                        notPeaksInRow = false;
-                        break;
-                    }
-                    if (iterator >= 3 && peaks[0].i == bi && peaks[0].j == j)
-                    {
-                        loopBuilded = true;
-                        break;
-                    }
-                    else
-                    {
-                        notPeaksInRow = true;
-                    }
+                    pi = way[iterator][k].i;
+                    pj = way[iterator][k].j;
+                    helpMatrix[pi][pj].PeakOnWay = true;
+                    iterator++;
+                    Way();
                 }
-                if (notPeaksInColumn == true || notPeaksInRow == true)
+            }
+        } 
+        else if (order == 1)
+        {
+            order = 0;
+            way.Add(new List<Peak>());
+            for (int j = 0; j < helpMatrix[0].Count; j++)
+            {
+                if (matrix[pi][j].Supplie > 0 && helpMatrix[pi][j].PeakOnWay != true)
                 {
-                    loopBuilded = false;
-                    wrongWay = true;
-                    HelpMatrixClearing();
-                    SolvingLoopBuilder(iterator, 0, peaks[0].i, peaks[0].j);
+                    row.Add(new Peak { i = pi, j = j });
                 }
-                else
-                    SolvingLoopBuilder(iterator, 0, bi, jj);
+            }
+            way[iterator].AddRange(row);
+            for (int k = 0; k < way[iterator].Count; k++)
+            {
+                if (helpMatrix[way[iterator][k].i][way[iterator][k].j].WrongPeak != true)
+                {
+                    pi = way[iterator][k].i;
+                    pj = way[iterator][k].j;
+                    helpMatrix[pi][pj].PeakOnWay = true;
+                    iterator++;
+                    Way();
+                }
             }
         }
     }
-    else if(loopBuilded != true)
-        peaks.Clear();
 }
 
 void DistributeSigns(ref int[] ints)
 {
     int order = 0;
-    for (int i = 0; i < peaks.Count; i++)
+    for (int i = 0; i < lPeaks.Count; i++)
     {
-        if (peaks[i].Flag != true)
+        if (lPeaks[i].Flag != true)
         {
-            ints[i - 1] = matrix[peaks[i].i][peaks[i].j].Supplie;
+            ints[i - 1] = matrix[lPeaks[i].i][lPeaks[i].j].Supplie;
         }
         switch (order)
         {
             case 0:
-                peaks[i].Sign = '+';
+                lPeaks[i].Sign = '+';
                 order = 1;
                 break;
             case 1:
-                peaks[i].Sign = '-';
+                lPeaks[i].Sign = '-';
                 order = 0;
                 break;
         }
-        Console.Write(peaks[i].Sign + " ");
+        Console.Write(lPeaks[i].Sign + " ");
     }
 }
 
 void Permutation(ref int[] ints)
 {
     int minValue = ints.Min();
-    for (int i = 0; i < peaks.Count; i++)
+    for (int i = 0; i < lPeaks.Count; i++)
     {
-        if (peaks[i].Sign == '+')
+        if (lPeaks[i].Sign == '+')
         {
-            matrix[peaks[i].i][peaks[i].j].Supplie += minValue;
+            matrix[lPeaks[i].i][lPeaks[i].j].Supplie += minValue;
         }
-        else if(peaks[i].Sign == '-')
+        else if(lPeaks[i].Sign == '-')
         {
-            matrix[peaks[i].i][peaks[i].j].Supplie -= minValue;
+            matrix[lPeaks[i].i][lPeaks[i].j].Supplie -= minValue;
         }
-    }
-}
-
-void HelpMatrixClearing()
-{
-    for (int i = 0; i < peaks.Count; i++)
-    {
-        helpMatrix[peaks[i].i][peaks[i].j].Value = 0;
-        helpMatrix[peaks[i].i][peaks[i].j].PeakOnWay = false;
     }
 }
 #endregion
@@ -400,25 +362,26 @@ void PotentialMethod()
     EquationBuilder();
     AddResolvingBases();
     EnterX2();
+    HelpMatrixDefault();
     for (int i = 0; i < resBases.Count; i++)
     {
         helpMatrix[resBases[i].i][resBases[i].j].PeakOnWay = true;
         HelpMatrixOutput();
         EnterX2();
         wrongWay = false;
-        peaks.Add(new Peak { i = resBases[i].i, j = resBases[i].j, Sign = '+', Flag = true});
-        SolvingLoopBuilder(iterator, 0, resBases[i].i, resBases[i].j);
+        lPeaks.Add(new LPeak { i = resBases[i].i, j = resBases[i].j, Sign = '+', Flag = true});
+        SolvingLoopBuilder(resBases[i].i, resBases[i].j);
         if (loopBuilded == true)
         {
-            int[] ints = new int[peaks.Count - 1];
+            int[] ints = new int[lPeaks.Count - 1];
             DistributeSigns(ref ints);
             Permutation(ref ints);
             SupplieMatrixOutput();
             SetLocationOfPotentials();
             EnterX2();
             loopBuilded = false;
-            HelpMatrixClearing();
-            peaks.Clear();
+            HelpMatrixDefault();
+            lPeaks.Clear();
 
         }
     }
