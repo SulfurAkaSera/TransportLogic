@@ -48,7 +48,6 @@ bool wrongWay;
 //------------Работа------------//
 PotentialMethod();
 
-
 //------------Проверки и заполнение массивов перед решением------------//
 #region DataValidAndFillingArrays
 void AddBasis()
@@ -260,48 +259,83 @@ void SolvingLoopBuilder(int bi, int bj)
         {
             order = 1;
             way.Add(new List<Peak>());
+            column.Clear();
             for (int i = 0; i < helpMatrix.Count; i++)
             {
-                if (matrix[i][pj].Supplie > 0 && helpMatrix[i][pj].PeakOnWay != true)
+                if (matrix[i][pj].Supplie > 0 && helpMatrix[i][pj].PeakOnWay != true && helpMatrix[i][pj].WrongPeak != true)
                 {
                     column.Add(new Peak { i = i, j = pj});
                 }
             }
-            way[iterator].AddRange(column);
-            for (int k = 0; k < way[iterator].Count; k++)
+
+            if (column.Count > 0)
+                notPeaksInColumn = false;
+            else
+                notPeaksInColumn = true;
+
+            if (notPeaksInColumn != true)
             {
-                if (helpMatrix[way[iterator][k].i][way[iterator][k].j].WrongPeak != true)
+                way[iterator].AddRange(column);
+                for (int k = 0; k < way[iterator].Count; k++)
                 {
-                    pi = way[iterator][k].i;
-                    pj = way[iterator][k].j;
-                    helpMatrix[pi][pj].PeakOnWay = true;
-                    iterator++;
-                    Way();
+                    if (helpMatrix[way[iterator][k].i][way[iterator][k].j].WrongPeak != true)
+                    {
+                        pi = way[iterator][k].i;
+                        pj = way[iterator][k].j;
+                        helpMatrix[pi][pj].PeakOnWay = true;
+                        iterator++;
+                        Way();
+                    }
                 }
             }
+            else
+            {
+                helpMatrix[pi][pj].WrongPeak = true;
+                if (iterator > 0)
+                    iterator -= 1;
+                Way();
+            }
+            
         } 
         else if (order == 1)
         {
             order = 0;
             way.Add(new List<Peak>());
+            row.Clear();
             for (int j = 0; j < helpMatrix[0].Count; j++)
             {
-                if (matrix[pi][j].Supplie > 0 && helpMatrix[pi][j].PeakOnWay != true)
+                if (matrix[pi][j].Supplie > 0 && helpMatrix[pi][j].PeakOnWay != true && helpMatrix[pi][j].WrongPeak != true)
                 {
                     row.Add(new Peak { i = pi, j = j });
                 }
             }
-            way[iterator].AddRange(row);
-            for (int k = 0; k < way[iterator].Count; k++)
+
+            if (row.Count > 0)
+                notPeaksInRow = false;
+            else
+                notPeaksInRow = true;
+
+            if (notPeaksInRow != true)
             {
-                if (helpMatrix[way[iterator][k].i][way[iterator][k].j].WrongPeak != true)
+                way[iterator].AddRange(row);
+                for (int k = 0; k < way[iterator].Count; k++)
                 {
-                    pi = way[iterator][k].i;
-                    pj = way[iterator][k].j;
-                    helpMatrix[pi][pj].PeakOnWay = true;
-                    iterator++;
-                    Way();
+                    if (helpMatrix[way[iterator][k].i][way[iterator][k].j].WrongPeak != true)
+                    {
+                        pi = way[iterator][k].i;
+                        pj = way[iterator][k].j;
+                        helpMatrix[pi][pj].PeakOnWay = true;
+                        iterator++;
+                        Way();
+                    }
                 }
+            }
+            else
+            {
+                helpMatrix[pi][pj].WrongPeak = true;
+                if(iterator > 0)
+                    iterator -= 1;
+                Way();
             }
         }
     }
