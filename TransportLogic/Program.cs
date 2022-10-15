@@ -1,7 +1,18 @@
 ﻿using TransportLogic.Models;
 using TransportLogic.Structures;
 
+/*
+ Итак, значится, можешь выкинуть все в отдельный клас и сделать так, чтобы пользователь
+ мог кидать исходные данные через конструктор например.
+ Все переменные, массивы и методы, за исключением исходных данных, тесно связаны и должны быть в
+ одном классе приватными, иначе все поломается.
+ Но, во всяком случае, ты можешь разобраться в алгоритме сам и сделать все так как считаешь нужным.
+ Только вот если ты вообще все перелопатил - ко мне не обращайся.
+*/
+
+
 //------------Исходные данные------------//
+#region Initial data
 List<List<Cell>> matrix = new List<List<Cell>>
 {
     new List<Cell>
@@ -28,9 +39,10 @@ List<List<Cell>> matrix = new List<List<Cell>>
 };
 List<int> providers = new() { 30, 20, 50 };
 List<int> consumers = new() { 25, 25, 40, 10 };
+#endregion
 
-
-//------------Вспомогательные массивы------------//
+//------------Вспомогательные массивы и переменные------------//
+#region Arrays and variables
 List<List<TempPeak>> helpMatrix = new List<List<TempPeak>>();
 List<ABValue> alphas = new();
 List<ABValue> betas= new();
@@ -45,8 +57,10 @@ bool notPeaksInRow = false;
 bool loopBuilded = false;
 bool wrongBasis = false;
 bool wrongWay;
+bool wrongAllBases;
+#endregion
 
-//------------Работа------------//
+//------------Вызов главного метода------------//
 PotentialMethod();
 
 //------------Проверки и заполнение массивов перед решением------------//
@@ -91,8 +105,7 @@ void HelpMatrixDefault()
 }
 #endregion
 
-
-//------------Заполнение методом северо-западного угла------------//
+//------------Решение задачи------------//
 #region SolvingMethods
 void PreparingForTheLoop()
 {
@@ -254,6 +267,7 @@ void AddResolvingBases()
 
 void SolvingLoopBuilder(int bi, int bj)
 {
+    //Ну, довай, удачи разобраться)
     int pi = bi;
     int pj = bj;
     var column = new List<Peak>();
@@ -466,12 +480,23 @@ void Permutation(ref int[] ints)
         }
     }
 }
+
+void SupplieSum()
+{
+    int sum = 0;
+    for (int i = 0; i < potentials.Count; i++)
+    {
+        sum += matrix[potentials[i].i][potentials[i].j].Cost * matrix[potentials[i].i][potentials[i].j].Supplie;
+    }
+    Console.WriteLine(sum);
+}
 #endregion
 
-//------------Решение методом потенциалов------------//
+//------------Главный метод------------//
 #region MainMethod
 void PotentialMethod()
 {
+    List<PBCellLoc> tempList = new List<PBCellLoc>();
     int iterator = 0;
     CostMatrixOutput();
     EnterX2();
@@ -480,12 +505,17 @@ void PotentialMethod()
     SupplieMatrixOutput();
     EnterX2();
     PreparingForTheLoop();
+    EnterX2();
+    SupplieSum();
     HelpMatrixDefault();
     BuildingLoop();
+    EnterX2();
+    SupplieSum();
     void BuildingLoop()
     {
         for (int i = 0; i < resBases.Count; i++)
         {
+            wrongAllBases = true;
             helpMatrix[resBases[i].i][resBases[i].j].PeakOnWay = true;
             EnterX2();
             wrongWay = false;
@@ -507,12 +537,16 @@ void PotentialMethod()
             }
             else
             {
+                tempList.Clear();
+                tempList.AddRange(resBases);
                 way.Clear();
                 if (i == resBases.Count - 1)
                 {
                     PreparingForTheLoop();
-                    BuildingLoop();
+                    if(wrongAllBases != true)
+                        BuildingLoop();
                 }
+
             }
         }
     }
@@ -520,7 +554,7 @@ void PotentialMethod()
 }
 #endregion
 
-//------------Методы вывода на экран------------//
+//------------Методы вывода на экран (Это нужно было мне для проверки. Можно удалить)------------//
 #region Output
 void EnterX2()
 {
