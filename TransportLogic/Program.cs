@@ -496,8 +496,6 @@ void SupplieSum()
 #region MainMethod
 void PotentialMethod()
 {
-    List<PBCellLoc> tempList = new List<PBCellLoc>();
-    int iterator = 0;
     CostMatrixOutput();
     EnterX2();
     NorthwestCornerMethodFilling();
@@ -537,8 +535,6 @@ void PotentialMethod()
             }
             else
             {
-                tempList.Clear();
-                tempList.AddRange(resBases);
                 way.Clear();
                 if (i == resBases.Count - 1)
                 {
