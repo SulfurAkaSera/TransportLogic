@@ -1,16 +1,6 @@
 ﻿using TransportLogic.Models;
 using TransportLogic.Structures;
 
-/*
- Итак, значится, можешь выкинуть все в отдельный клас и сделать так, чтобы пользователь
- мог кидать исходные данные через конструктор например.
- Все переменные, массивы и методы, за исключением исходных данных, тесно связаны и должны быть в
- одном классе приватными, иначе все поломается.
- Но, во всяком случае, ты можешь разобраться в алгоритме сам и сделать все так как считаешь нужным.
- Только вот если ты вообще все перелопатил - ко мне не обращайся.
-*/
-
-
 //------------Исходные данные------------//
 #region Initial data
 List<List<Cell>> matrix = new List<List<Cell>>
@@ -41,7 +31,7 @@ List<int> providers = new() { 30, 20, 50 };
 List<int> consumers = new() { 25, 25, 40, 10 };
 #endregion
 
-//------------Вспомогательные массивы и переменные------------//
+//------------Вспомогательные массивы и переменные(инициализировать в конструкторе)------------//
 #region Arrays and variables
 List<List<TempPeak>> helpMatrix = new List<List<TempPeak>>();
 List<ABValue> alphas = new();
@@ -61,7 +51,10 @@ bool wrongAllBases;
 #endregion
 
 //------------Вызов главного метода------------//
-PotentialMethod();
+PotentialMethod(matrix, providers, consumers);
+
+//------------Решение задачи(подкапотка, вся приватная)------------//
+#region SolvingMethods
 
 //------------Проверки и заполнение массивов перед решением------------//
 #region DataValidAndFillingArrays
@@ -69,7 +62,7 @@ void AddBasis()
 {
     for (int i = 0; i < providers.Count; i++)
     {
-        alphas.Add(new ABValue { Value = 0, Changed = false});
+        alphas.Add(new ABValue { Value = 0, Changed = false });
     }
     for (int i = 0; i < consumers.Count; i++)
     {
@@ -97,16 +90,14 @@ void HelpMatrixDefault()
     for (int i = 0; i < matrix.Count; i++)
     {
         helpMatrix.Add(new List<TempPeak>());
-        for(int j = 0; j < matrix[i].Count; j++)
+        for (int j = 0; j < matrix[i].Count; j++)
         {
-            helpMatrix[i].Add(new TempPeak { Value = 0, PeakOnWay = false, WrongPeak = false});
+            helpMatrix[i].Add(new TempPeak { Value = 0, PeakOnWay = false, WrongPeak = false });
         }
     }
 }
 #endregion
 
-//------------Решение задачи------------//
-#region SolvingMethods
 void PreparingForTheLoop()
 {
     SetLocationOfPotentials();
@@ -492,10 +483,13 @@ void SupplieSum()
 }
 #endregion
 
-//------------Главный метод------------//
+//------------Главный метод(закидываем в аргументы исх. данные. Получаем 2 мерный массив)------------//
 #region MainMethod
-void PotentialMethod()
+List<List<Cell>> PotentialMethod(List<List<Cell>> initialMatrix, List<int> initialProviders, List<int> initialConsumers)
 {
+    matrix = initialMatrix;
+    providers = initialProviders;
+    consumers = initialConsumers;
     CostMatrixOutput();
     EnterX2();
     NorthwestCornerMethodFilling();
@@ -546,7 +540,7 @@ void PotentialMethod()
             }
         }
     }
-    
+    return matrix;
 }
 #endregion
 
